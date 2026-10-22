@@ -1,0 +1,167 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <customErrors>
+        <name>Block_Invalid_Forward_Progression</name>
+        <label>Block Invalid Forward Progression</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <customErrorMessages>
+            <errorMessage>Onboarding stages must move forward one stage at a time. You can move backward when needed.</errorMessage>
+            <isFieldError>false</isFieldError>
+        </customErrorMessages>
+    </customErrors>
+    <customErrors>
+        <name>Require_Gathering_Info_Notes</name>
+        <label>Require Gathering Info Notes</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <customErrorMessages>
+            <errorMessage>Enter Gathering Info Notes before moving to another stage.</errorMessage>
+            <fieldSelection>Gathering_Info_Notes__c</fieldSelection>
+            <isFieldError>true</isFieldError>
+        </customErrorMessages>
+    </customErrors>
+    <customErrors>
+        <name>Require_Implementation_Notes</name>
+        <label>Require Implementation Notes</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <customErrorMessages>
+            <errorMessage>Enter Implementation Notes before moving to another stage.</errorMessage>
+            <fieldSelection>Implementation_Notes__c</fieldSelection>
+            <isFieldError>true</isFieldError>
+        </customErrorMessages>
+    </customErrors>
+    <decisions>
+        <name>Check_Stage_Progression</name>
+        <label>Check Stage Progression</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>Valid Stage Change</defaultConnectorLabel>
+        <rules>
+            <name>Invalid_Forward_Progression</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Is_Invalid_Forward_Progression</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Block_Invalid_Forward_Progression</targetReference>
+            </connector>
+            <label>Invalid Forward Progression</label>
+        </rules>
+        <rules>
+            <name>Missing_Gathering_Info_Notes</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Is_Missing_Gathering_Info_Notes</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Require_Gathering_Info_Notes</targetReference>
+            </connector>
+            <label>Missing Gathering Info Notes</label>
+        </rules>
+        <rules>
+            <name>Missing_Implementation_Notes</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Is_Missing_Implementation_Notes</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Require_Implementation_Notes</targetReference>
+            </connector>
+            <label>Missing Implementation Notes</label>
+        </rules>
+    </decisions>
+    <environments>Default</environments>
+    <formulas>
+        <name>Is_Invalid_Forward_Progression</name>
+        <dataType>Boolean</dataType>
+        <expression>AND(
+    TEXT({!$Record.Onboarding_Stage__c}) &lt;&gt; TEXT({!$Record__Prior.Onboarding_Stage__c}),
+    CASE(TEXT({!$Record.Onboarding_Stage__c}),
+        &quot;Kickoff Scheduled&quot;, 1,
+        &quot;Gathering Info&quot;, 2,
+        &quot;Implementation&quot;, 3,
+        &quot;QA / Review&quot;, 4,
+        &quot;Go Live&quot;, 5,
+        &quot;Post-Launch Review&quot;, 6,
+        0
+    ) &gt;
+    CASE(TEXT({!$Record__Prior.Onboarding_Stage__c}),
+        &quot;Kickoff Scheduled&quot;, 1,
+        &quot;Gathering Info&quot;, 2,
+        &quot;Implementation&quot;, 3,
+        &quot;QA / Review&quot;, 4,
+        &quot;Go Live&quot;, 5,
+        &quot;Post-Launch Review&quot;, 6,
+        0
+    ) + 1
+)</expression>
+    </formulas>
+    <formulas>
+        <name>Is_Missing_Gathering_Info_Notes</name>
+        <dataType>Boolean</dataType>
+        <expression>AND(
+    TEXT({!$Record.Onboarding_Stage__c}) &lt;&gt; TEXT({!$Record__Prior.Onboarding_Stage__c}),
+    CASE(TEXT({!$Record.Onboarding_Stage__c}), &quot;Kickoff Scheduled&quot;, 1, &quot;Gathering Info&quot;, 2, &quot;Implementation&quot;, 3, &quot;QA / Review&quot;, 4, &quot;Go Live&quot;, 5, &quot;Post-Launch Review&quot;, 6, 0) &gt; CASE(TEXT({!$Record__Prior.Onboarding_Stage__c}), &quot;Kickoff Scheduled&quot;, 1, &quot;Gathering Info&quot;, 2, &quot;Implementation&quot;, 3, &quot;QA / Review&quot;, 4, &quot;Go Live&quot;, 5, &quot;Post-Launch Review&quot;, 6, 0),
+    TEXT({!$Record__Prior.Onboarding_Stage__c}) = &quot;Gathering Info&quot;,
+    ISBLANK({!$Record.Gathering_Info_Notes__c})
+)</expression>
+    </formulas>
+    <formulas>
+        <name>Is_Missing_Implementation_Notes</name>
+        <dataType>Boolean</dataType>
+        <expression>AND(
+    TEXT({!$Record.Onboarding_Stage__c}) &lt;&gt; TEXT({!$Record__Prior.Onboarding_Stage__c}),
+    CASE(TEXT({!$Record.Onboarding_Stage__c}), &quot;Kickoff Scheduled&quot;, 1, &quot;Gathering Info&quot;, 2, &quot;Implementation&quot;, 3, &quot;QA / Review&quot;, 4, &quot;Go Live&quot;, 5, &quot;Post-Launch Review&quot;, 6, 0) &gt; CASE(TEXT({!$Record__Prior.Onboarding_Stage__c}), &quot;Kickoff Scheduled&quot;, 1, &quot;Gathering Info&quot;, 2, &quot;Implementation&quot;, 3, &quot;QA / Review&quot;, 4, &quot;Go Live&quot;, 5, &quot;Post-Launch Review&quot;, 6, 0),
+    TEXT({!$Record__Prior.Onboarding_Stage__c}) = &quot;Implementation&quot;,
+    ISBLANK({!$Record.Implementation_Notes__c})
+)</expression>
+    </formulas>
+    <interviewLabel>Onboarding Lifecycle Validation {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Onboarding Lifecycle Validation</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Check_Stage_Progression</targetReference>
+        </connector>
+        <object>Onboarding__c</object>
+        <recordTriggerType>Update</recordTriggerType>
+        <triggerType>RecordAfterSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>

@@ -1,0 +1,155 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Flow xmlns="http://soap.sforce.com/2006/04/metadata">
+    <apiVersion>65.0</apiVersion>
+    <areMetricsLoggedToDataCloud>false</areMetricsLoggedToDataCloud>
+    <assignments>
+        <name>Set_Stage_Timestamps</name>
+        <label>Set Stage Timestamps</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <assignmentItems>
+            <assignToReference>$Record.Current_Stage_Entered_At__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>Current_Stage_Entry_Time</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>$Record.Kickoff_Scheduled_At__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>First_Kickoff_Scheduled_Time</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>$Record.Gathering_Info_At__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>First_Gathering_Info_Time</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>$Record.Implementation_At__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>First_Implementation_Time</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>$Record.QA_Review_At__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>First_QA_Review_Time</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>$Record.Go_Live_At__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>First_Go_Live_Time</elementReference>
+            </value>
+        </assignmentItems>
+        <assignmentItems>
+            <assignToReference>$Record.Post_Launch_Review_At__c</assignToReference>
+            <operator>Assign</operator>
+            <value>
+                <elementReference>First_Post_Launch_Review_Time</elementReference>
+            </value>
+        </assignmentItems>
+    </assignments>
+    <decisions>
+        <name>Check_Stage_Entry</name>
+        <label>Check Stage Entry</label>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <defaultConnectorLabel>No Stage Change</defaultConnectorLabel>
+        <rules>
+            <name>New_Record_Or_Stage_Changed</name>
+            <conditionLogic>and</conditionLogic>
+            <conditions>
+                <leftValueReference>Stage_Is_New_Or_Changed</leftValueReference>
+                <operator>EqualTo</operator>
+                <rightValue>
+                    <booleanValue>true</booleanValue>
+                </rightValue>
+            </conditions>
+            <connector>
+                <targetReference>Set_Stage_Timestamps</targetReference>
+            </connector>
+            <label>New Record or Stage Changed</label>
+        </rules>
+    </decisions>
+    <environments>Default</environments>
+    <formulas>
+        <name>Current_Stage_Entry_Time</name>
+        <dataType>DateTime</dataType>
+        <expression>$Flow.CurrentDateTime</expression>
+    </formulas>
+    <formulas>
+        <name>First_Gathering_Info_Time</name>
+        <dataType>DateTime</dataType>
+        <expression>IF(AND(TEXT({!$Record.Onboarding_Stage__c}) = &quot;Gathering Info&quot;, ISBLANK({!$Record.Gathering_Info_At__c})), $Flow.CurrentDateTime, {!$Record.Gathering_Info_At__c})</expression>
+    </formulas>
+    <formulas>
+        <name>First_Go_Live_Time</name>
+        <dataType>DateTime</dataType>
+        <expression>IF(AND(TEXT({!$Record.Onboarding_Stage__c}) = &quot;Go Live&quot;, ISBLANK({!$Record.Go_Live_At__c})), $Flow.CurrentDateTime, {!$Record.Go_Live_At__c})</expression>
+    </formulas>
+    <formulas>
+        <name>First_Implementation_Time</name>
+        <dataType>DateTime</dataType>
+        <expression>IF(AND(TEXT({!$Record.Onboarding_Stage__c}) = &quot;Implementation&quot;, ISBLANK({!$Record.Implementation_At__c})), $Flow.CurrentDateTime, {!$Record.Implementation_At__c})</expression>
+    </formulas>
+    <formulas>
+        <name>First_Kickoff_Scheduled_Time</name>
+        <dataType>DateTime</dataType>
+        <expression>IF(AND(TEXT({!$Record.Onboarding_Stage__c}) = &quot;Kickoff Scheduled&quot;, ISBLANK({!$Record.Kickoff_Scheduled_At__c})), $Flow.CurrentDateTime, {!$Record.Kickoff_Scheduled_At__c})</expression>
+    </formulas>
+    <formulas>
+        <name>First_Post_Launch_Review_Time</name>
+        <dataType>DateTime</dataType>
+        <expression>IF(AND(TEXT({!$Record.Onboarding_Stage__c}) = &quot;Post-Launch Review&quot;, ISBLANK({!$Record.Post_Launch_Review_At__c})), $Flow.CurrentDateTime, {!$Record.Post_Launch_Review_At__c})</expression>
+    </formulas>
+    <formulas>
+        <name>First_QA_Review_Time</name>
+        <dataType>DateTime</dataType>
+        <expression>IF(AND(TEXT({!$Record.Onboarding_Stage__c}) = &quot;QA / Review&quot;, ISBLANK({!$Record.QA_Review_At__c})), $Flow.CurrentDateTime, {!$Record.QA_Review_At__c})</expression>
+    </formulas>
+    <formulas>
+        <name>Stage_Is_New_Or_Changed</name>
+        <dataType>Boolean</dataType>
+        <expression>OR(ISNEW(), ISCHANGED({!$Record.Onboarding_Stage__c}))</expression>
+    </formulas>
+    <interviewLabel>Onboarding Stage Timestamp Tracker {!$Flow.CurrentDateTime}</interviewLabel>
+    <label>Onboarding Stage Timestamp Tracker</label>
+    <processMetadataValues>
+        <name>BuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>CanvasMode</name>
+        <value>
+            <stringValue>AUTO_LAYOUT_CANVAS</stringValue>
+        </value>
+    </processMetadataValues>
+    <processMetadataValues>
+        <name>OriginBuilderType</name>
+        <value>
+            <stringValue>LightningFlowBuilder</stringValue>
+        </value>
+    </processMetadataValues>
+    <processType>AutoLaunchedFlow</processType>
+    <start>
+        <locationX>0</locationX>
+        <locationY>0</locationY>
+        <connector>
+            <targetReference>Check_Stage_Entry</targetReference>
+        </connector>
+        <object>Onboarding__c</object>
+        <recordTriggerType>CreateAndUpdate</recordTriggerType>
+        <triggerType>RecordBeforeSave</triggerType>
+    </start>
+    <status>Active</status>
+</Flow>
